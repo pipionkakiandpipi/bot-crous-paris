@@ -1,0 +1,322 @@
+{
+ "results": {
+  "total": {
+   "value": 2,
+   "relation": "eq"
+  },
+  "page": 0,
+  "pageSize": 100,
+  "items": [
+   {
+    "code": 84,
+    "reference": "6",
+    "bedroomCount": 2,
+    "id": 90001,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": null,
+       "id": "b435afe9-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Train",
+        "id": "0f830257-fa97-11e7-89ed-005056940822"
+       }
+      },
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": "Bus : terminus toutes lignes, toutes destinations\narrêt gare. Navette gratuite centre-ville.",
+       "id": "b435bfb0-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 1,
+     "uairne": "041004DA",
+     "address": "5 Rue de la Grange aux Belles 75010 PARIS",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain payant",
+        "id": "06b12f90-fa98-11e7-89ed-005056940822"
+       },
+       "description": "Parking fermé non surveillé situé sous la résidence, et en surface dans l’enceinte de la résidence, dans la limite des places disponibles et pour un montant mensuel de 20 €.",
+       "id": "a1718f0c-0ff4-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>R&eacute;sidence &eacute;ligible &agrave; l&#39;APL situ&eacute;e dans le quartier de la gare, site de la chocolaterie. Proche IUT, INSA, lyc&eacute;e Camille Claudel, lyc&eacute;e des arts et m&eacute;tiers et tous sites d&#39;enseignement sup&eacute;rieur. Arr&ecirc;t navette gratuite centre-ville et station tous bus. R&eacute;sidence &eacute;quip&eacute;e: local v&eacute;lo ferm&eacute;, acc&egrave;s TV/TNT, acc&egrave;s internet en Wifi inclus, ascenseur, laverie, salle commune, agent de s&eacute;curit&eacute; et de veille la nuit. Commerces &agrave; proximit&eacute;. Acc&egrave;s internet inclus dans le loyer. Contact: 02.54.78.61.38 - blois@crous-orleans-tours.fr</p>\n\n<p>Visualisez les logements propos&eacute;s gr&acirc;ce &agrave; nos <a href=\"https://www.crous-orleans-tours.fr/logements/nos-residences/blois/residence-docteur-desfray/\" onclick=\"window.open(this.href, '', 'resizable=yes,status=no,location=no,toolbar=no,menubar=no,fullscreen=no,scrollbars=yes,dependent=no'); return false;\">visites virtuelles</a>.</p>",
+     "location": {
+      "lon": 1.326,
+      "lat": 47.585
+     },
+     "sharedTransports": [],
+     "id": "452cbf06-0d87-11e8-89ed-005056940822",
+     "entity": {
+      "name": "ORLEANS-TOURS",
+      "id": 6
+     },
+     "medias": [
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e7c55f0-façade derriere.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e86d10d-façade devant.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e8e450e-Garage à vélo.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e98ad4d-Laverie.JPG"
+      }
+     ],
+     "label": "RESIDENCE TEST PARIS 1"
+    },
+    "bedCount": 2,
+    "adaptedPmr": false,
+    "roomCount": 2,
+    "area": {
+     "min": 30.31,
+     "max": 31.69
+    },
+    "label": "T2 31m2",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "house_sharing",
+      "rent": {
+       "min": 32600,
+       "max": 32600
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 2,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "1079/5a854b231b937-T2_3.JPG",
+      "description": null
+     },
+     {
+      "src": "1079/5a854b239ecce-T2_2.JPG",
+      "description": null
+     },
+     {
+      "src": "1079/5a854b2411986-T2_1.JPG",
+      "description": null
+     }
+    ]
+   },
+   {
+    "code": 84,
+    "reference": "7",
+    "bedroomCount": 2,
+    "id": 522,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": 30,
+       "unitOfMeasure": "metre",
+       "description": "Bus : Ligne 6 (réseau T.U.M.)",
+       "id": "e1b10ca6-fd2c-11e7-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 26,
+     "uairne": "0400976U",
+     "address": "Avenue du Commandant CLERE 40000 MONT-DE-MARSAN",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain gratuit",
+        "id": "10402a4e-fa98-11e7-89ed-005056940822"
+       },
+       "description": "La résidence dispose d'un parking privatif.",
+       "id": "e1b124c2-fd2c-11e7-89ed-005056940822"
+      }
+     ],
+     "description": "<p>La r&eacute;sidence universitaire Le V&eacute;lum est situ&eacute;e &agrave; mi-chemin entre le centre ville et le lyc&eacute;e Charles DESPIAU.</p>\r\n\r\n<p>Logement b&eacute;n&eacute;ficiant de l&rsquo;APL (APL : aide personnalis&eacute;e au logement)</p>",
+     "location": {
+      "lon": -0.497,
+      "lat": 43.884
+     },
+     "sharedTransports": [],
+     "id": "27d4c545-fc8e-11e7-89ed-005056940822",
+     "entity": {
+      "name": "Bordeaux",
+      "id": 4
+     },
+     "medias": [
+      {
+       "src": "27d4c545-fc8e-11e7-89ed-005056940822/5a620de1e0710-Le Velum_4.jpg"
+      }
+     ],
+     "label": "LE VELUM"
+    },
+    "bedCount": 2,
+    "adaptedPmr": false,
+    "roomCount": 3,
+    "area": {
+     "min": 29.0,
+     "max": 29.0
+    },
+    "label": "T1BIS",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090b6e0-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Pièce à vivre"
+     },
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "house_sharing",
+      "rent": {
+       "min": 24661,
+       "max": 24661
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 2,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "522/648ad830c946b-IMG_20230614_153530_1.jpg",
+      "description": "Bureau"
+     },
+     {
+      "src": "522/648add59c6b9b-IMG_20230614_153934.jpg",
+      "description": "Kitchenette"
+     },
+     {
+      "src": "522/648adf448eda6-IMG_20230614_154439.jpg",
+      "description": "Salle d'eau"
+     },
+     {
+      "src": "522/648addabc54c7-IMG_20230614_154428.jpg",
+      "description": "Salle d'eau"
+     },
+     {
+      "src": "522/648adb1d8c741-IMG_20230614_153953.jpg",
+      "description": "Kitchenette"
+     },
+     {
+      "src": "522/648ad999ac2d2-IMG_20230614_154310.jpg",
+      "description": "Chambre"
+     },
+     {
+      "src": "522/648ad999c0642-IMG_20230614_153545_1.jpg",
+      "description": "Chambre"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,864 @@
+{
+ "results": {
+  "total": {
+   "value": 6,
+   "relation": "eq"
+  },
+  "page": 0,
+  "pageSize": 100,
+  "items": [
+   {
+    "code": 84,
+    "reference": "7",
+    "bedroomCount": 2,
+    "id": 522,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": 30,
+       "unitOfMeasure": "metre",
+       "description": "Bus : Ligne 6 (réseau T.U.M.)",
+       "id": "e1b10ca6-fd2c-11e7-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 26,
+     "uairne": "0400976U",
+     "address": "Avenue du Commandant CLERE 40000 MONT-DE-MARSAN",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain gratuit",
+        "id": "10402a4e-fa98-11e7-89ed-005056940822"
+       },
+       "description": "La résidence dispose d'un parking privatif.",
+       "id": "e1b124c2-fd2c-11e7-89ed-005056940822"
+      }
+     ],
+     "description": "<p>La r&eacute;sidence universitaire Le V&eacute;lum est situ&eacute;e &agrave; mi-chemin entre le centre ville et le lyc&eacute;e Charles DESPIAU.</p>\r\n\r\n<p>Logement b&eacute;n&eacute;ficiant de l&rsquo;APL (APL : aide personnalis&eacute;e au logement)</p>",
+     "location": {
+      "lon": -0.497,
+      "lat": 43.884
+     },
+     "sharedTransports": [],
+     "id": "27d4c545-fc8e-11e7-89ed-005056940822",
+     "entity": {
+      "name": "Bordeaux",
+      "id": 4
+     },
+     "medias": [
+      {
+       "src": "27d4c545-fc8e-11e7-89ed-005056940822/5a620de1e0710-Le Velum_4.jpg"
+      }
+     ],
+     "label": "LE VELUM"
+    },
+    "bedCount": 2,
+    "adaptedPmr": false,
+    "roomCount": 3,
+    "area": {
+     "min": 29.0,
+     "max": 29.0
+    },
+    "label": "T1BIS",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090b6e0-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Pièce à vivre"
+     },
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "house_sharing",
+      "rent": {
+       "min": 24661,
+       "max": 24661
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 2,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "522/648ad830c946b-IMG_20230614_153530_1.jpg",
+      "description": "Bureau"
+     },
+     {
+      "src": "522/648add59c6b9b-IMG_20230614_153934.jpg",
+      "description": "Kitchenette"
+     },
+     {
+      "src": "522/648adf448eda6-IMG_20230614_154439.jpg",
+      "description": "Salle d'eau"
+     },
+     {
+      "src": "522/648addabc54c7-IMG_20230614_154428.jpg",
+      "description": "Salle d'eau"
+     },
+     {
+      "src": "522/648adb1d8c741-IMG_20230614_153953.jpg",
+      "description": "Kitchenette"
+     },
+     {
+      "src": "522/648ad999ac2d2-IMG_20230614_154310.jpg",
+      "description": "Chambre"
+     },
+     {
+      "src": "522/648ad999c0642-IMG_20230614_153545_1.jpg",
+      "description": "Chambre"
+     }
+    ]
+   },
+   {
+    "code": 56,
+    "reference": "2",
+    "bedroomCount": 1,
+    "id": 392,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": null,
+       "unitOfMeasure": "on_foot",
+       "description": null,
+       "id": "8db09ce8-0029-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 2,
+     "uairne": "9711243Z",
+     "address": "Route du stade Pierre Antonius Bergevin 97110 Pointe-à-Pitre",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain gratuit",
+        "id": "10402a4e-fa98-11e7-89ed-005056940822"
+       },
+       "description": null,
+       "id": "034ec8ff-0029-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>Localisation:</p>\r\n\r\n<p>En plein centre-ville de Pointe-&agrave;-Pitre.</p>\r\n\r\n<p>Acc&egrave;s : Campus desservi par des lignes de bus ou v&eacute;hicule particulier</p>\r\n\r\n<p>Types de logements:</p>\r\n\r\n<p>Des T1 de 13 &agrave; 27 m2 avec sanitaires individuels, cuisine collective.</p>",
+     "location": {
+      "lon": -61.543,
+      "lat": 16.252
+     },
+     "sharedTransports": [],
+     "id": "49fcc0ef-ff90-11e7-89ed-005056940822",
+     "entity": {
+      "name": "Antilles-Guyane",
+      "id": 15
+     },
+     "medias": [
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05c953cc9-ext.jpg"
+      },
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05d118575-IMG_4193.JPG"
+      },
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05d52d9f6-IMG_4191.JPG"
+      }
+     ],
+     "label": "Hyacinthe BASTARAUD"
+    },
+    "bedCount": 1,
+    "adaptedPmr": false,
+    "roomCount": 1,
+    "area": {
+     "min": 15.0,
+     "max": 17.0
+    },
+    "label": "Chambre simple de T1 15-17 m",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "alone",
+      "rent": {
+       "min": 41800,
+       "max": 47100
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 1,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "392/5d8fceb5082c2-5a7a064a2e0d5-IMG_4180_1.jpg",
+      "description": null
+     },
+     {
+      "src": "392/5d8fceb54046d-5a7a065b50cc5-IMG_4181.jpg",
+      "description": null
+     },
+     {
+      "src": "392/5d8fcede809b5-5a7a065ba277b-IMG_4190.jpg",
+      "description": null
+     }
+    ]
+   },
+   {
+    "code": 17,
+    "reference": "2",
+    "bedroomCount": 1,
+    "id": 859,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": null,
+       "unitOfMeasure": "on_foot",
+       "description": null,
+       "id": "8db09ce8-0029-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 2,
+     "uairne": "9711243Z",
+     "address": "Route du stade Pierre Antonius Bergevin 97110 Pointe-à-Pitre",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain gratuit",
+        "id": "10402a4e-fa98-11e7-89ed-005056940822"
+       },
+       "description": null,
+       "id": "034ec8ff-0029-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>Localisation:</p>\r\n\r\n<p>En plein centre-ville de Pointe-&agrave;-Pitre.</p>\r\n\r\n<p>Acc&egrave;s : Campus desservi par des lignes de bus ou v&eacute;hicule particulier</p>\r\n\r\n<p>Types de logements:</p>\r\n\r\n<p>Des T1 de 13 &agrave; 27 m2 avec sanitaires individuels, cuisine collective.</p>",
+     "location": {
+      "lon": -61.543,
+      "lat": 16.252
+     },
+     "sharedTransports": [],
+     "id": "49fcc0ef-ff90-11e7-89ed-005056940822",
+     "entity": {
+      "name": "Antilles-Guyane",
+      "id": 15
+     },
+     "medias": [
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05c953cc9-ext.jpg"
+      },
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05d118575-IMG_4193.JPG"
+      },
+      {
+       "src": "49fcc0ef-ff90-11e7-89ed-005056940822/5a7a05d52d9f6-IMG_4191.JPG"
+      }
+     ],
+     "label": "Hyacinthe BASTARAUD"
+    },
+    "bedCount": 1,
+    "adaptedPmr": false,
+    "roomCount": 1,
+    "area": {
+     "min": 13.0,
+     "max": 14.0
+    },
+    "label": "Chambre simple de  T1 13-14 m",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     },
+     {
+      "id": "d091b03f-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Balcon"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "alone",
+      "rent": {
+       "min": 39700,
+       "max": 47100
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 1,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "859/5a7a064a2e0d5-IMG_4180_1.jpg",
+      "description": null
+     },
+     {
+      "src": "859/5a7a065b50cc5-IMG_4181.JPG",
+      "description": null
+     },
+     {
+      "src": "859/5a7a065ba277b-IMG_4190.JPG",
+      "description": null
+     }
+    ]
+   },
+   {
+    "code": 81,
+    "reference": "2",
+    "bedroomCount": 1,
+    "id": 1047,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": null,
+       "id": "b435afe9-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Train",
+        "id": "0f830257-fa97-11e7-89ed-005056940822"
+       }
+      },
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": "Bus : terminus toutes lignes, toutes destinations\narrêt gare. Navette gratuite centre-ville.",
+       "id": "b435bfb0-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 1,
+     "uairne": "041004DA",
+     "address": "5 rue du Docteur Desfray 41000 BLOIS",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain payant",
+        "id": "06b12f90-fa98-11e7-89ed-005056940822"
+       },
+       "description": "Parking fermé non surveillé situé sous la résidence, et en surface dans l’enceinte de la résidence, dans la limite des places disponibles et pour un montant mensuel de 20 €.",
+       "id": "a1718f0c-0ff4-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>R&eacute;sidence &eacute;ligible &agrave; l&#39;APL situ&eacute;e dans le quartier de la gare, site de la chocolaterie. Proche IUT, INSA, lyc&eacute;e Camille Claudel, lyc&eacute;e des arts et m&eacute;tiers et tous sites d&#39;enseignement sup&eacute;rieur. Arr&ecirc;t navette gratuite centre-ville et station tous bus. R&eacute;sidence &eacute;quip&eacute;e: local v&eacute;lo ferm&eacute;, acc&egrave;s TV/TNT, acc&egrave;s internet en Wifi inclus, ascenseur, laverie, salle commune, agent de s&eacute;curit&eacute; et de veille la nuit. Commerces &agrave; proximit&eacute;. Acc&egrave;s internet inclus dans le loyer. Contact: 02.54.78.61.38 - blois@crous-orleans-tours.fr</p>\n\n<p>Visualisez les logements propos&eacute;s gr&acirc;ce &agrave; nos <a href=\"https://www.crous-orleans-tours.fr/logements/nos-residences/blois/residence-docteur-desfray/\" onclick=\"window.open(this.href, '', 'resizable=yes,status=no,location=no,toolbar=no,menubar=no,fullscreen=no,scrollbars=yes,dependent=no'); return false;\">visites virtuelles</a>.</p>",
+     "location": {
+      "lon": 1.326,
+      "lat": 47.585
+     },
+     "sharedTransports": [],
+     "id": "452cbf06-0d87-11e8-89ed-005056940822",
+     "entity": {
+      "name": "ORLEANS-TOURS",
+      "id": 6
+     },
+     "medias": [
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e7c55f0-façade derriere.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e86d10d-façade devant.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e8e450e-Garage à vélo.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e98ad4d-Laverie.JPG"
+      }
+     ],
+     "label": "DR DESFRAY"
+    },
+    "bedCount": 1,
+    "adaptedPmr": false,
+    "roomCount": 1,
+    "area": {
+     "min": 19.0,
+     "max": 19.0
+    },
+    "label": "T1 19m2",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "alone",
+      "rent": {
+       "min": 44500,
+       "max": 44500
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 1,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "1047/5ca5bc21d24a3-P1010255.JPG",
+      "description": null
+     },
+     {
+      "src": "1047/5ca5bc22d935a-P1010256.JPG",
+      "description": null
+     },
+     {
+      "src": "1047/5ca5bc239fc04-P1010257.JPG",
+      "description": null
+     }
+    ]
+   },
+   {
+    "code": 84,
+    "reference": "6",
+    "bedroomCount": 2,
+    "id": 1079,
+    "residence": {
+     "publicTransports": [
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": null,
+       "id": "b435afe9-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Train",
+        "id": "0f830257-fa97-11e7-89ed-005056940822"
+       }
+      },
+      {
+       "distance": 200,
+       "unitOfMeasure": "metre",
+       "description": "Bus : terminus toutes lignes, toutes destinations\narrêt gare. Navette gratuite centre-ville.",
+       "id": "b435bfb0-0db8-11e8-89ed-005056940822",
+       "publicTransport": {
+        "name": "Bus",
+        "id": "057fbe77-fa97-11e7-89ed-005056940822"
+       }
+      }
+     ],
+     "code": 1,
+     "uairne": "041004DA",
+     "address": "5 Rue de la Grange aux Belles 75010 PARIS",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain payant",
+        "id": "06b12f90-fa98-11e7-89ed-005056940822"
+       },
+       "description": "Parking fermé non surveillé situé sous la résidence, et en surface dans l’enceinte de la résidence, dans la limite des places disponibles et pour un montant mensuel de 20 €.",
+       "id": "a1718f0c-0ff4-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>R&eacute;sidence &eacute;ligible &agrave; l&#39;APL situ&eacute;e dans le quartier de la gare, site de la chocolaterie. Proche IUT, INSA, lyc&eacute;e Camille Claudel, lyc&eacute;e des arts et m&eacute;tiers et tous sites d&#39;enseignement sup&eacute;rieur. Arr&ecirc;t navette gratuite centre-ville et station tous bus. R&eacute;sidence &eacute;quip&eacute;e: local v&eacute;lo ferm&eacute;, acc&egrave;s TV/TNT, acc&egrave;s internet en Wifi inclus, ascenseur, laverie, salle commune, agent de s&eacute;curit&eacute; et de veille la nuit. Commerces &agrave; proximit&eacute;. Acc&egrave;s internet inclus dans le loyer. Contact: 02.54.78.61.38 - blois@crous-orleans-tours.fr</p>\n\n<p>Visualisez les logements propos&eacute;s gr&acirc;ce &agrave; nos <a href=\"https://www.crous-orleans-tours.fr/logements/nos-residences/blois/residence-docteur-desfray/\" onclick=\"window.open(this.href, '', 'resizable=yes,status=no,location=no,toolbar=no,menubar=no,fullscreen=no,scrollbars=yes,dependent=no'); return false;\">visites virtuelles</a>.</p>",
+     "location": {
+      "lon": 1.326,
+      "lat": 47.585
+     },
+     "sharedTransports": [],
+     "id": "452cbf06-0d87-11e8-89ed-005056940822",
+     "entity": {
+      "name": "ORLEANS-TOURS",
+      "id": 6
+     },
+     "medias": [
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e7c55f0-façade derriere.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e86d10d-façade devant.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e8e450e-Garage à vélo.JPG"
+      },
+      {
+       "src": "452cbf06-0d87-11e8-89ed-005056940822/5a8549e98ad4d-Laverie.JPG"
+      }
+     ],
+     "label": "RESIDENCE TEST PARIS 1"
+    },
+    "bedCount": 2,
+    "adaptedPmr": false,
+    "roomCount": 2,
+    "area": {
+     "min": 30.31,
+     "max": 31.69
+    },
+    "label": "T2 31m2",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "house_sharing",
+      "rent": {
+       "min": 32600,
+       "max": 32600
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 2,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": [
+     {
+      "src": "1079/5a854b231b937-T2_3.JPG",
+      "description": null
+     },
+     {
+      "src": "1079/5a854b239ecce-T2_2.JPG",
+      "description": null
+     },
+     {
+      "src": "1079/5a854b2411986-T2_1.JPG",
+      "description": null
+     }
+    ]
+   },
+   {
+    "code": 13,
+    "reference": "2",
+    "bedroomCount": 1,
+    "id": 6,
+    "residence": {
+     "publicTransports": [],
+     "code": 20,
+     "uairne": "0195049K",
+     "address": "21 Avenue de la Porte de Charenton 75012 PARIS",
+     "parkings": [
+      {
+       "parking": {
+        "name": "Stationnement urbain gratuit",
+        "id": "10402a4e-fa98-11e7-89ed-005056940822"
+       },
+       "description": null,
+       "id": "dd9fa5c1-1325-11e8-89ed-005056940822"
+      }
+     ],
+     "description": "<p>R&eacute;sidence situ&eacute;e &agrave; Tulle, &agrave; proximit&eacute; du campus universitaire proposant 23 T1 et 3 T2</p>",
+     "location": {
+      "lon": 1.748,
+      "lat": 45.26
+     },
+     "sharedTransports": [],
+     "id": "f73f1996-0820-11e8-89ed-005056940822",
+     "entity": {
+      "name": "Limoges",
+      "id": 19
+     },
+     "medias": [
+      {
+       "src": "f73f1996-0820-11e8-89ed-005056940822/5aa2860b6bc48-Tulle exterieur 2.jpg"
+      }
+     ],
+     "label": "RESIDENCE TEST PARIS 2"
+    },
+    "bedCount": 1,
+    "adaptedPmr": false,
+    "roomCount": 1,
+    "area": {
+     "min": 26.0,
+     "max": 26.0
+    },
+    "label": "Tulle Studio",
+    "indicators": [
+     {
+      "tool_id": 22,
+      "highDemand": false,
+      "lowStock": false
+     },
+     {
+      "tool_id": 47,
+      "highDemand": false,
+      "lowStock": false
+     }
+    ],
+    "equipments": [
+     {
+      "id": "d090e186-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "WC"
+     },
+     {
+      "id": "d0910683-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Douche"
+     },
+     {
+      "id": "d0912861-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Evier + plaque"
+     },
+     {
+      "id": "d0914ae7-fa0e-11e7-89ed-005056940822",
+      "category": "Bâtiment",
+      "label": "Frigo"
+     }
+    ],
+    "bookingData": {
+     "amount": 7000
+    },
+    "highDemand": false,
+    "lowStock": false,
+    "occupationModes": [
+     {
+      "type": "alone",
+      "rent": {
+       "min": 40359,
+       "max": 40359
+      }
+     }
+    ],
+    "available": true,
+    "beds": [
+     {
+      "count": 1,
+      "type": "simple"
+     }
+    ],
+    "inUnavailabilityPeriod": false,
+    "unavailabilityMessage": null,
+    "specialConditions": null,
+    "description": null,
+    "studyLevel": {
+     "min": null,
+     "max": null
+    },
+    "medias": []
+   }
+  ]
+ }
+}

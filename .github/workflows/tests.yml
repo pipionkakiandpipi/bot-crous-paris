@@ -1,0 +1,28 @@
+name: Tests
+
+# Joue les tests unitaires à chaque push et pull request :
+# filtre Paris, multi-outils, migration d'état, emails, watchdog, digest.
+# Aucun secret requis (fixtures issues d'une réponse réelle de l'API CROUS).
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    # pas de tests sur les commits automatiques du bot (mise à jour d'état)
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tests unitaires
+        run: python -m unittest discover -s tests -v

@@ -1,16 +1,24 @@
 # Bot CROUS Paris — alerte email dès qu'un logement apparaît
 
 Surveille en continu [trouverunlogement.lescrous.fr](https://trouverunlogement.lescrous.fr)
-(phase complémentaire / logements résiduels) et **envoie un email dès qu'un nouveau
-logement étudiant devient disponible à Paris**, avec le lien direct pour réserver.
+et **envoie un email dès qu'un nouveau logement étudiant devient disponible à
+Paris**, avec le lien direct, le prix et l'adresse pour réserver vite.
 
 - **100 % gratuit** : hébergé sur GitHub Actions (tourne 24h/24, même PC éteint)
+- **Deux outils surveillés** : phase complémentaire (47) **et** attribution
+  directe (44, ouverte toute l'année) — le double de chances
 - **Notification email** via Gmail (SMTP + mot de passe d'application)
 - **Zéro faux positif** : seul un logement *nouveau* déclenche un email
   (le premier passage mémorise l'existant sans rien envoyer)
+- **Watchdog intégré** : si le bot tombe en panne, un email
+  « BOT EN PANNE » vous prévient (un seul par panne)
+- **Résumé hebdo** : chaque dimanche, un email confirme que tout veille
+  (détections, réapparitions, dispo actuel)
+- **Historique complet** : chaque détection est journalisée (`history.jsonl`)
+- **Tests automatiques** : 17 tests unitaires joués à chaque push
 - **Zéro dépendance** : Python standard uniquement, exécution en ~30 secondes
 - Basé sur [AUTO-CROUS](https://github.com/Kdevos12/AUTO-CROUS) (MIT), adapté
-  email + Paris + GitHub Actions
+  email + Paris + multi-outils + GitHub Actions
 
 > Les logements de la phase complémentaire partent en quelques minutes.
 > Ce bot fait une vérification toutes les 10 minutes — moins de trafic
@@ -71,14 +79,24 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes.
 
 1. Toutes les 10 minutes, GitHub Actions lance `crous_bot.py`.
 2. Le script interroge l'API JSON interne du site CROUS (celle que la page
-   appelle elle-même) et récupère tous les logements en recherche.
-3. Il ne garde que ceux de la zone surveillée (codes postaux `75xxx`) et
-   compare avec le passage précédent (fichier `seen.json`).
-4. Un logement **nouveau** → email groupé (résidence, adresse, type, loyer,
-   lien direct). L'état est ensuite commité dans le dépôt.
+   appelle elle-même) pour **chaque outil surveillé** (47 phase complémentaire
+   + 44 attribution directe) et récupère tous les logements en recherche.
+3. Il ne garde que ceux de la zone surveillée (codes postaux `75xxx`), les
+   identifie par outil (`47:522`) et compare avec le passage précédent
+   (`seen.json`).
+4. Un logement **nouveau** → email avec **résidence, prix et type dans le
+   sujet**, et dans le corps : adresse, gros bouton « Voir et réserver »
+   (lien direct). L'état et l'historique sont commités dans le dépôt.
 5. Un logement qui disparaît (réservé par quelqu'un) puis **réapparaît**
    (réservation abandonnée) déclenche à nouveau un email — c'est voulu,
-   c'est une nouvelle chance de l'attraper.
+   c'est une nouvelle chance de l'attraper (marqué `reappeared` dans
+   l'historique).
+6. **Watchdog** (chaque heure) : si aucune vérification réussie depuis 35 à
+   95 minutes → email « PANNE bot CROUS ». Exactement un email par panne ;
+   silence = tout va bien.
+7. **Digest** (chaque dimanche 19-20h) : email de résumé — nombre de
+   détections depuis le début, réapparitions, logements actuellement
+   disponibles à Paris.
 
 ## Personnalisation
 
@@ -87,9 +105,11 @@ Dans le workflow `.github/workflows/crous.yml` (section *env* de l'étape
 
 - `PARIS_POSTAL_PREFIXES` : `75` (Paris) ; `75,92,93,94` (Paris + petite
   couronne) ; `75,77,78,91,92,93,94,95` (toute l'Île-de-France).
-- `CROUS_TOOL_ID` : `47` = phase complémentaire actuelle. Si le CROUS change
-  d'outil pour l'année suivante, vérifiez `https://trouverunlogement.lescrous.fr/api/global/context`
-  (champ `tools.currentSchoolYear.id`) et adaptez.
+- `CROUS_TOOL_IDS` : `47,44` aujourd'hui. Si le CROUS ouvre l'outil 2027,
+   vérifiez `https://trouverunlogement.lescrous.fr/api/global/context`
+   (champ `tools.currentSchoolYear.id`) et adaptez. Un outil ajouté est
+   **initialisé silencieusement** (pas d'email pour les logements déjà en
+   ligne, seulement pour les nouveaux).
 
 Le destinataire des emails (`NOTIFY_EMAIL`) : jusqu'à ~500/jour côté Gmail,
 largement suffisant (vous recevrez quelques emails par semaine au plus).
@@ -102,6 +122,7 @@ Pour tester sur votre machine sans GitHub Actions :
 cp .env.example .env        # puis remplissez les 3 valeurs
 py crous_bot.py --test-email   # email de test + passage de surveillance
 py crous_bot.py --dry-run      # simule un email, l'écrit dans email_preview.txt/.html
+python -m unittest discover -s tests   # joue les tests
 ```
 
 Le fichier `.env` est ignoré par git (jamais envoyé sur GitHub).
@@ -111,10 +132,11 @@ Le fichier `.env` est ignoré par git (jamais envoyé sur GitHub).
 - **Retards possibles du cron** : GitHub Actions peut avoir quelques minutes de
   retard en période de forte charge. Inévitable en hébergement gratuit.
 - **Salle d'attente anti-surcharge** : le site CROUS se met en protection en
-  période d'attribution. Le script retente 3 fois (30 s d'écart).
-- **Phase 2026** : la phase complémentaire actuelle se termine le 02/11/2026.
-  Ensuite la recherche renverra 0 résultat jusqu'à la réouverture de l'an prochain
-  (pensez à vérifier `CROUS_TOOL_ID`).
+  période d'attribution. Le script retente 3 fois (30 s d'écart). Si un seul
+  outil répond, l'autre est retenté au passage suivant sans rien casser.
+- **Phase 2026** : la phase complémentaire (outil 47) se termine le 02/11/2026.
+  L'attribution directe (outil 44) reste ouverte toute l'année. L'an prochain,
+  vérifiez le nouvel outil (voir Personnalisation).
 - **Arrêter le bot** : dépôt → onglet *Actions* → sélectionner le workflow →
   *Disable workflow* (ou supprimer le dépôt).
 
