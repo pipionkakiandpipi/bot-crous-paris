@@ -575,16 +575,20 @@ def check(cfg, zone_by_tool):
 
     seen = state["items"]
     initialized = list(state["initialized_tools"])
+    newly_initialized = False
 
-    # outils ajoutés depuis le dernier passage : initialisation silencieuse
+    # Outils ajoutés depuis le dernier passage : initialisation silencieuse.
+    # L'outil est marqué initialisé dès qu'il est surveillé avec succès,
+    # même vide : ses FUTURS logements seront de vraies nouveautés.
     silent = set()
     for tool_id in zone_by_tool:
         if tool_id not in initialized:
             initialized.append(tool_id)
-            silent = {k for k in current if k.startswith(f"{tool_id}:")}
-            if silent:
-                log(f"outil {tool_id} initialisé — {len(silent)} logement(s) "
-                    f"mémorisé(s) sans notification.")
+            newly_initialized = True
+            keys = {k for k in current if k.startswith(f"{tool_id}:")}
+            silent |= keys
+            log(f"outil {tool_id} initialisé — {len(keys)} logement(s) "
+                f"mémorisé(s) sans notification.")
 
     new = {k: s for k, s in current.items()
            if k not in seen and k not in silent}
@@ -607,7 +611,7 @@ def check(cfg, zone_by_tool):
         log(f"EMAIL ENVOYÉ à {', '.join(cfg['notify_emails'])}.")
         write_gha_outputs(new_count=len(new), zone_count=len(current))
 
-    if not cfg["dry_run"] and (silent or current != seen):
+    if not cfg["dry_run"] and (newly_initialized or current != seen):
         save_state(current, initialized)
     log(f"OK — {len(current)} logement(s) en ligne dans la zone, {len(new)} nouveau(x).")
 

@@ -129,6 +129,23 @@ class TestMultiOutils(BotTestCase):
         self.assertIn("44:90001", state["items"])
         self.assertEqual(sorted(state["initialized_tools"]), [44, 47])
 
+    def test_outil_vide_marque_initialise(self):
+        """Un outil vide à son ajout doit être marqué initialisé dans l'état :
+        ses futurs logements seront de VRAIES nouveautés -> email."""
+        items47 = load_fixture("api_47.json")
+        current47 = {f"47:{crous_bot.summarize(it, 47)['id']}": crous_bot.summarize(it, 47)
+                     for it in zone_items(items47)}
+        self.write_state(current47, initialized=(47,))
+        cfg = make_cfg(tools=(47, 44))
+        # 1) l'outil 44 est surveillé mais vide (0 logement dans la zone)
+        fake = self.run_check(cfg, {47: items47, 44: []})
+        fake.assert_not_called()
+        state = json.loads(crous_bot.STATE.read_text(encoding="utf-8"))
+        self.assertIn(44, state["initialized_tools"])
+        # 2) des logements apparaissent ensuite dans le 44 -> email
+        fake = self.run_check(cfg, {47: items47, 44: load_fixture("api_44.json")})
+        fake.assert_called_once()      # vraie nouveauté, pas une init
+
     def test_nouveau_logement_outil_44(self):
         items47, items44 = load_fixture("api_47.json"), load_fixture("api_44.json")
         current = {f"47:{crous_bot.summarize(it, 47)['id']}": crous_bot.summarize(it, 47)
