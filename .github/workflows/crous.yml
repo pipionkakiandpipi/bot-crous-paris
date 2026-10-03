@@ -15,6 +15,11 @@ on:
         type: boolean
         required: false
         default: false
+      diag:
+        description: "Diagnostic API uniquement (outils 47 et 44), sans surveillance"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write            # nécessaire pour committer seen.json
@@ -34,7 +39,34 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Diagnostic API (temporaire, outils 47 et 44)
+        if: inputs.diag
+        run: |
+          for tool in 47 44; do
+            echo "=== TOOL $tool ==="
+            curl -s -X POST "https://trouverunlogement.lescrous.fr/api/fr/search/$tool" \
+              -H "Content-Type: application/json" -H "Accept: application/json" -H "User-Agent: Mozilla/5.0" \
+              -d "{\"idTool\":$tool,\"need_aggregation\":false,\"page\":1,\"pageSize\":100,\"sector\":null,\"occupationModes\":[],\"residence\":null,\"precision\":null,\"equipment\":[],\"price\":{\"min\":0,\"max\":10000000},\"location\":null}" \
+              --max-time 30 | python3 -c "
+          import json, sys, re
+          raw = sys.stdin.read()
+          try:
+              d = json.loads(raw)
+              res = d['results']; items = res['items']
+              paris = [it for it in items if re.search(r'(?<!\d)75\d{3}(?!\d)', (it.get('residence') or {}).get('address','') or '')]
+              print('TOTAL:', res['total'], '| ITEMS:', len(items), '| PARIS:', len(paris))
+              for it in paris[:5]: print('  75:', it.get('id'), '|', (it.get('residence') or {}).get('label'), '|', (it.get('residence') or {}).get('address'))
+              it = items[0]
+              print('CHAMPS OK:', 'id' in it and 'residence' in it and 'occupationModes' in it and 'available' in it)
+              om = (it.get('occupationModes') or [{}])[0]
+              print('RENT:', om.get('rent'), '| BOOKING:', it.get('bookingData'))
+          except Exception as e:
+              print('ERREUR:', e, '| BRUT:', raw[:150])
+          "
+          done
+
       - name: Vérification des logements CROUS
+        if: ${{ !inputs.diag }}
         id: check
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
@@ -46,6 +78,7 @@ jobs:
         run: python crous_bot.py
 
       - name: Sauvegarde de l'état (seen.json)
+        if: ${{ !inputs.diag }}
         env:
           NEW_COUNT: ${{ steps.check.outputs.new_count }}
         run: |
