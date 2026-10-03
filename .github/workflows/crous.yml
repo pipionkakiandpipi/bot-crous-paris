@@ -1,0 +1,77 @@
+name: Vérification CROUS Paris
+
+# Surveille les nouveaux logements CROUS toutes les 10 minutes.
+# Le 1er de chaque mois, un commit "keepalive" évite que GitHub ne
+# désactive le workflow après 60 jours sans activité sur le repo.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # toutes les 10 minutes
+    - cron: '0 3 1 * *'      # le 1er de chaque mois à 3h UTC (garder le cron actif)
+  workflow_dispatch:        # permet aussi de lancer manuellement
+    inputs:
+      test_email:
+        description: "Envoyer aussi un email de test (vérifier la configuration Gmail)"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write            # nécessaire pour committer seen.json
+
+concurrency:
+  group: crous-check         # évite que deux exécutions ne se chevauchent
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Vérification des logements CROUS
+        id: check
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          CROUS_TOOL_ID: '47'
+          PARIS_POSTAL_PREFIXES: '75'
+          SEND_TEST_EMAIL: ${{ inputs.test_email && 'true' || 'false' }}
+        run: python crous_bot.py
+
+      - name: Sauvegarde de l'état (seen.json)
+        env:
+          NEW_COUNT: ${{ steps.check.outputs.new_count }}
+        run: |
+          git config user.name "crous-bot[bot]"
+          git config user.email "actions@github.com"
+          git add seen.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement d'état à sauvegarder."
+          else
+            git commit -m "Surveillance : état mis à jour${NEW_COUNT:+ ($NEW_COUNT nouveau(x) logement(s))}"
+            git push
+            echo "seen.json commité."
+          fi
+
+  keepalive:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 3 1 * *'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Commit mensuel pour garder le cron actif
+        run: |
+          git config user.name "crous-bot[bot]"
+          git config user.email "actions@github.com"
+          date -u > .keepalive
+          git add .keepalive
+          git commit -m "Keepalive mensuel (évite la désactivation du cron à 60 jours)"
+          git push
