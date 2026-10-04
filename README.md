@@ -119,8 +119,10 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes
 > augmentent les chances d'exécution, et le watchdog ne t'alerte qu'après
 > 12 h sans aucune vérification réussie, pour ne t'envoyer que les vraies
 > pannes. C'est une limite connue de l'infrastructure partagée GitHub, pas
-> un bug du bot. **Pour une vraie cadence 10 minutes, voir la section
-> [Migration VM gratuite](#migrer-sur-une-vm-gratuite--vraie-vérif-toutes-les-10-minutes).**
+> un bug du bot. C'est le compromis de l'hébergement 100 % gratuit — le bot
+> reste entièrement fonctionnel sur GitHub. **Si un jour tu veux passer à la
+> vraie cadence 10 minutes, tout est prêt : voir la section
+> [Option avancée : VM gratuite](#option-avancée--vm-gratuite-pour-la-vraie-cadence-10-minutes-facultatif).**
 
 ## Personnalisation
 
@@ -145,12 +147,13 @@ Dans le workflow `.github/workflows/crous.yml` (section *env* de l'étape
 Le destinataire des emails (`NOTIFY_EMAIL`) : jusqu'à ~500/jour côté Gmail,
 largement suffisant (vous recevrez quelques emails par semaine au plus).
 
-## Migrer sur une VM gratuite — vraie vérif toutes les 10 minutes
+## Option avancée : VM gratuite pour la vraie cadence 10 minutes (facultatif)
 
-GitHub Actions retarde fortement les crons fréquents (limite d'infrastructure
-partagée : ~1 exécution toutes les 1 à 3 h constaté). Pour une **vraie cadence
-10 minutes**, hébergez le bot sur une VM Oracle Cloud « Always Free »
-(gratuite à vie). Tout est préparé (`deploy/oracle/`).
+Le bot fonctionne très bien sur GitHub Actions — cette section est **purement
+optionnelle**, pour plus tard si tu veux passer à une vraie cadence 10 minutes
+(GitHub Actions retarde fortement les crons fréquents : ~1 exécution toutes
+les 1 à 3 h constaté). Tout est préparé (`deploy/oracle/`) : une VM Oracle
+Cloud « Always Free » (gratuite à vie), installation en 1 commande.
 
 ### 1. Compte + VM (une fois, ~10 min)
 
