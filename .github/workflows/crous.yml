@@ -75,6 +75,9 @@ jobs:
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           CROUS_TOOL_IDS: '47,44'
           PARIS_POSTAL_PREFIXES: '75'
+          LOKAVIZ_ENABLED: 'true'
+          LOKAVIZ_TYPE_IDS: '4,1,146'   # Chambre, Studio ou T1, T1bis
+          LOKAVIZ_MAX_RENT: '750'       # loyer max € charges comprises
           SEND_TEST_EMAIL: ${{ inputs.test_email && 'true' || 'false' }}
         run: python crous_bot.py
 

@@ -7,7 +7,9 @@ couvrir le filtre géographique (aucun logement Paris réel disponible ce
 jour-là). Voir tests/fixtures/.
 """
 import copy
+import hashlib
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -34,7 +36,8 @@ def make_cfg(tools=(47, 44), dry_run=False):
     return {"gmail_user": "t@gmail.com", "gmail_app_password": "x",
             "notify_emails": ["t@gmail.com"], "tool_ids": list(tools),
             "postal_prefixes": ["75"], "send_test_email": False,
-            "dry_run": dry_run}
+            "dry_run": dry_run, "lokaviz_type_ids": ["4", "1", "146"],
+            "lokaviz_max_rent": 750, "lokaviz_max_pages": 10}
 
 
 class BotTestCase(unittest.TestCase):
@@ -298,6 +301,108 @@ class TestDigest(BotTestCase):
         stats = crous_bot.digest_stats([], now=datetime(2026, 10, 3, 12, 0))
         subject, text, html = crous_bot.build_digest_email(stats, available=0)
         self.assertIn("0", subject)
+
+
+# ---------------------------------------------------------------------------
+# Lokaviz (v3) — chambres/studios/T1bis <= 750 € autour du Lycée Rabelais
+# ---------------------------------------------------------------------------
+
+def load_html(name):
+    return (FIXTURES / name).read_text(encoding="utf-8")
+
+
+class TestLokaviz(BotTestCase):
+    def test_puissance_de_travail_anubis(self):
+        for difficulty in (1, 2):
+            digest, nonce = crous_bot.solve_anubis("lokaviz-test", difficulty)
+            self.assertEqual(
+                digest, hashlib.sha256(f"lokaviz-test{nonce}".encode()).hexdigest())
+            self.assertTrue(digest.startswith("0" * difficulty))
+
+    def test_page_vide(self):
+        self.assertEqual(crous_bot.parse_lokaviz_listings(
+            load_html("lokaviz_empty.html")), [])
+
+    def test_parse_annonce_filtree(self):
+        items = crous_bot.parse_lokaviz_listings(load_html("lokaviz_match.html"))
+        self.assertEqual(len(items), 1)
+        s = crous_bot.summarize_lokaviz(items[0])
+        self.assertEqual(s["id"], "161553")
+        self.assertEqual(s["tool"], "lokaviz")
+        self.assertEqual(s["rent_min"], 69000)      # centimes (cohérent CROUS)
+        self.assertIn("Chambre", s["residence"])
+        self.assertIn("690", s["price"])
+        self.assertIn("75018", s["address"])       # Paris 18e
+        self.assertTrue(s["link"].startswith("https://www.lokaviz.fr/"))
+        self.assertIn("logement_id:161553", s["link"])
+
+    def test_url_filtres(self):
+        url = crous_bot.lokaviz_search_url()
+        self.assertIn("loyer=750", url)
+        self.assertIn("refloglogement_id", url)
+        self.assertIn("etab_id=118", url)          # autour du Lycée Rabelais
+        self.assertIn("nbkm=6", url)
+
+    def test_fetch_pagination(self):
+        pages = {"1": load_html("lokaviz_match.html"), "2": load_html("lokaviz_page2.html")}
+
+        class FakeSession:
+            calls = []
+
+            def get(self, path):
+                FakeSession.calls.append(path)
+                m = re.search(r"/page:(\d+)", path)
+                return pages[m.group(1) if m else "1"]
+
+        items = crous_bot.fetch_lokaviz(make_cfg(), session=FakeSession())
+        self.assertEqual(sorted(i["id"] for i in items), ["161553", "161554"])
+        self.assertEqual(len(FakeSession.calls), 2)   # s'arrête : pas de page 3
+        self.assertIn("page:2", FakeSession.calls[1])
+        self.assertIn("loyer=750", FakeSession.calls[0])
+
+    def test_etat_outils_mixtes(self):
+        self.write_state({}, initialized=(44, 47, "lokaviz"))
+        st = crous_bot.load_state()
+        self.assertIn("lokaviz", st["initialized_tools"])
+        self.assertIn(47, st["initialized_tools"])
+        # ré-save sans crash (tri d'une liste int + str mélangés)
+        crous_bot.save_state(st["items"], st["initialized_tools"])
+        self.assertIn("lokaviz", crous_bot.load_state()["initialized_tools"])
+
+    def test_init_silencieuse_puis_nouveaute(self):
+        cfg = make_cfg()
+        # items BRUTS parsés (check() les résume lui-même)
+        lok = crous_bot.parse_lokaviz_listings(load_html("lokaviz_match.html"))
+        self.write_state({}, initialized=(44, 47))
+
+        def run(zone_by_tool):
+            with mock.patch.object(crous_bot, "send_email") as fake:
+                crous_bot.check(cfg, zone_by_tool)
+                return fake
+
+        # 1er passage lokaviz : initialisation silencieuse, aucun email
+        fake = run({47: [], "lokaviz": lok})
+        fake.assert_not_called()
+        state = json.loads(crous_bot.STATE.read_text(encoding="utf-8"))
+        self.assertIn("lokaviz", state["initialized_tools"])
+        self.assertIn("lokaviz:161553", state["items"])
+
+        # 2e passage : l'annonce disparaît -> retirée de l'état
+        run({47: [], "lokaviz": []})
+        state = json.loads(crous_bot.STATE.read_text(encoding="utf-8"))
+        self.assertNotIn("lokaviz:161553", state["items"])
+
+        # 3e passage : elle revient -> email, sujet Lokaviz, historique
+        fake = run({47: [], "lokaviz": lok})
+        fake.assert_called_once()
+        subject, text, html = fake.call_args[0][1], fake.call_args[0][2], fake.call_args[0][3]
+        self.assertIn("Lokaviz", subject)
+        self.assertIn("690", text + html)
+        self.assertIn("logement_id:161553", text + html)
+        lines = [json.loads(l) for l in
+                 crous_bot.HISTORY.read_text(encoding="utf-8").splitlines() if l]
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0]["tool"], "lokaviz")
 
 
 if __name__ == "__main__":

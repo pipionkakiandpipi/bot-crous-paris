@@ -1,12 +1,18 @@
-# Bot CROUS Paris — alerte email dès qu'un logement apparaît
+# Bot logements étudiants Paris — alerte email dès qu'un logement apparaît
 
 Surveille en continu [trouverunlogement.lescrous.fr](https://trouverunlogement.lescrous.fr)
-et **envoie un email dès qu'un nouveau logement étudiant devient disponible à
-Paris**, avec le lien direct, le prix et l'adresse pour réserver vite.
+**et** [lokaviz.fr](https://www.lokaviz.fr) (logements chez l'habitant), et
+**envoie un email dès qu'un nouveau logement étudiant devient disponible**,
+avec le lien direct, le prix et l'adresse pour réserver vite.
 
 - **100 % gratuit** : hébergé sur GitHub Actions (tourne 24h/24, même PC éteint)
-- **Deux outils surveillés** : phase complémentaire (47) **et** attribution
+- **Deux outils CROUS** : phase complémentaire (47) **et** attribution
   directe (44, ouverte toute l'année) — le double de chances
+- **Lokaviz en plus** : chambres, studios/T1 et T1bis à **750 € max
+  (charges comprises)** dans un rayon de 6 km autour du Lycée Rabelais
+  (Paris 18e) — le site est protégé par Anubis (anti-robot), le bot résout
+  sa preuve de travail à chaque vérification (une requête par passage,
+  comme un étudiant qui rafraîchit la page)
 - **Notification email** via Gmail (SMTP + mot de passe d'application)
 - **Zéro faux positif** : seul un logement *nouveau* déclenche un email
   (le premier passage mémorise l'existant sans rien envoyer)
@@ -15,10 +21,10 @@ Paris**, avec le lien direct, le prix et l'adresse pour réserver vite.
 - **Résumé hebdo** : chaque dimanche, un email confirme que tout veille
   (détections, réapparitions, dispo actuel)
 - **Historique complet** : chaque détection est journalisée (`history.jsonl`)
-- **Tests automatiques** : 17 tests unitaires joués à chaque push
+- **Tests automatiques** : 25 tests unitaires joués à chaque push
 - **Zéro dépendance** : Python standard uniquement, exécution en ~30 secondes
 - Basé sur [AUTO-CROUS](https://github.com/Kdevos12/AUTO-CROUS) (MIT), adapté
-  email + Paris + multi-outils + GitHub Actions
+  email + Paris + multi-outils + lokaviz + GitHub Actions
 
 > Les logements de la phase complémentaire partent en quelques minutes.
 > Ce bot fait une vérification toutes les 10 minutes — moins de trafic
@@ -99,6 +105,13 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes
 7. **Digest** (chaque dimanche 19-20h) : email de résumé — nombre de
    détections depuis le début, réapparitions, logements actuellement
    disponibles à Paris.
+8. **Lokaviz** (chaque passage aussi) : recherche filtrée côté serveur —
+   types Chambre / Studio-T1 / T1bis, loyer ≤ 750 € charges comprises, dans
+   un rayon de 6 km autour du Lycée Rabelais (Paris 18e). Une annonce
+   **nouvelle** déclenche le même email (sujet `Lokaviz Paris — …`) avec
+   l'adresse, le loyer, les charges, les dates de disponibilité et le lien
+   direct de l'annonce. Le challenge Anubis du site (preuve de travail
+   anti-robot) est résolu à chaque passage.
 
 > **Note sur la fréquence réelle** : GitHub Actions (gratuit) retarde ou
 > supprime les crons très fréquents — constaté : ~1 exécution toutes les 1 à
@@ -120,6 +133,13 @@ Dans le workflow `.github/workflows/crous.yml` (section *env* de l'étape
    (champ `tools.currentSchoolYear.id`) et adaptez. Un outil ajouté est
    **initialisé silencieusement** (pas d'email pour les logements déjà en
    ligne, seulement pour les nouveaux).
+- `LOKAVIZ_MAX_RENT` : loyer maximum € charges comprises (défaut `750`).
+- `LOKAVIZ_TYPE_IDS` : types lokaviz (défaut `4,1,146` = Chambre, Studio ou
+  T1, T1bis). Autres valeurs visibles sur la page de recherche lokaviz
+  (T2=188, T3=189…).
+- `LOKAVIZ_ENABLED` : `false` pour désactiver la veille lokaviz.
+- `LOKAVIZ_SEARCH_PATH` : recherche géographique lokaviz (défaut : 6 km
+  autour du Lycée Rabelais, Paris 18e — `etab_id=118&nbkm=6`).
 
 Le destinataire des emails (`NOTIFY_EMAIL`) : jusqu'à ~500/jour côté Gmail,
 largement suffisant (vous recevrez quelques emails par semaine au plus).

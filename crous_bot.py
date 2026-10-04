@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 """CROUS Paris — surveillance des nouveaux logements + notification par email.
 
-v2 — Basé sur AUTO-CROUS (https://github.com/Kdevos12/AUTO-CROUS, licence MIT),
+v3 — Basé sur AUTO-CROUS (https://github.com/Kdevos12/AUTO-CROUS, licence MIT),
 adapté puis étendu :
 
   - MULTI-OUTILS : surveille en parallèle la phase complémentaire
     (outil 47) et l'attribution directe (outil 44, ouverte toute l'année) ;
+  - LOKAVIZ : chambres / studios-T1 / T1bis <= 750 € (charges comprises)
+    dans un rayon de 6 km autour du Lycée Rabelais (Paris 18e) — le site
+    étant protégé par Anubis, la preuve de travail est résolue à chaque
+    vérification (une requête par passage, usage individuel poli) ;
   - FILTRE CÔTÉ SCRIPT : codes postaux 75xxx (l'API n'accepte plus le
     paramètre "location") — un seul appel par outil récupère tout ;
   - ÉTAT + HISTORIQUE : seen.json (identifiants déjà vus, préfixés par
@@ -27,6 +31,10 @@ Variables d'environnement (ou fichier .env local) :
     NOTIFY_EMAIL           destinataire(s), séparés par des virgules
     CROUS_TOOL_IDS         outils surveillés (défaut "47,44")
     PARIS_POSTAL_PREFIXES  préfixes de codes postaux (défaut "75")
+    LOKAVIZ_ENABLED        "false" pour désactiver lokaviz (défaut actif)
+    LOKAVIZ_TYPE_IDS       types lokaviz (défaut "4,1,146" = Chambre,
+                          Studio ou T1, T1bis)
+    LOKAVIZ_MAX_RENT       loyer max € charges comprises (défaut 750)
     SEND_TEST_EMAIL        "true" pour un email de test
     GITHUB_API_TOKEN       watchdog seulement — jeton GitHub (Actions)
     GITHUB_REPOSITORY      watchdog seulement — "compte/repo" (Actions)
@@ -38,6 +46,7 @@ Usage :
     python crous_bot.py --watchdog     # contrôle de santé (cron horaire)
     python crous_bot.py --digest       # résumé hebdo (cron dimanche)
 """
+import hashlib
 import html as html_mod
 import json
 import os
@@ -47,6 +56,7 @@ import ssl
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from email.header import Header
@@ -70,6 +80,16 @@ RETRY_DELAY = 30      # secondes entre deux tentatives (salle d'attente)
 WATCHDOG_THRESHOLD_MIN = 720  # plus ancienne réussite tolérée (min) — GitHub décale fortement les crons fréquents, on n'alerte qu'après 12 h sans vérification
 WATCHDOG_WINDOW_MAX = 1440    # au-delà : panne déjà signalée, silence (24 h)
 LEGACY_TOOL = 47      # outil de l'époque v1 (clés d'état non préfixées)
+LOKAVIZ_TOOL = "lokaviz"   # source lokaviz.fr (clés d'état "lokaviz:<id>")
+LOKAVIZ_BASE = "https://www.lokaviz.fr"
+LOKAVIZ_DEFAULT_SEARCH = (
+    "/rechercher-un-logement-etudiant/fiche-logement/affichage:liste"
+    "?etab_id=118&pres_de=Lyc%C3%A9e+Rabelais+18e+%2875+-+Paris%29&nbkm=6"
+    "&NE=48.98967992353915%2C2.4969863891601567"
+    "&SW=48.80912453144312%2C2.193832397460938&ZOOM=12")
+LOKAVIZ_TYPE_IDS = "4,1,146"   # Chambre, Studio ou T1, T1bis
+LOKAVIZ_MAX_RENT = 750         # loyer max (€, charges comprises)
+LOKAVIZ_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 
 def log(line):
@@ -113,6 +133,13 @@ def load_config():
         "dry_run": "--dry-run" in sys.argv,
         "watchdog": "--watchdog" in sys.argv,
         "digest": "--digest" in sys.argv,
+        "lokaviz_enabled": os.environ.get("LOKAVIZ_ENABLED", "true").strip().lower() != "false",
+        "lokaviz_type_ids": [t.strip() for t in
+                            os.environ.get("LOKAVIZ_TYPE_IDS", LOKAVIZ_TYPE_IDS).split(",")
+                            if t.strip()],
+        "lokaviz_max_rent": int(os.environ.get("LOKAVIZ_MAX_RENT", str(LOKAVIZ_MAX_RENT))),
+        "lokaviz_max_pages": int(os.environ.get("LOKAVIZ_MAX_PAGES", "10")),
+        "lokaviz_search_path": os.environ.get("LOKAVIZ_SEARCH_PATH", LOKAVIZ_DEFAULT_SEARCH),
     }
 
 
@@ -162,6 +189,214 @@ def fetch_listings(tool_id):
         if not batch or len(items) >= total:
             return items
         page += 1
+
+
+# ---------------------------------------------------------------------------
+# Lokaviz — chambres/studios/T1bis <= 750 € autour du Lycée Rabelais (Paris)
+# ---------------------------------------------------------------------------
+
+def solve_anubis(random_data, difficulty):
+    """Preuve de travail Anubis : sha256(randomData + nonce) en hex doit
+    commencer par `difficulty` zéros (difficulté 2 sur lokaviz : ~256 essais,
+    instantané). Validé sur le vrai challenge du site (04/10/2026)."""
+    prefix = "0" * difficulty
+    nonce = 0
+    while True:
+        digest = hashlib.sha256(f"{random_data}{nonce}".encode()).hexdigest()
+        if digest.startswith(prefix):
+            return digest, nonce
+        nonce += 1
+
+
+class AnubisSession:
+    """Session HTTP qui franchit le challenge Anubis de lokaviz.fr.
+
+    Le site utilise Anubis (anti-scraping massif par preuve de travail) :
+    un usage individuel poli — une requête de recherche par vérification,
+    comme un étudiant qui rafraîchit la page — passe le filtre en résolvant
+    la preuve de travail exactement comme un navigateur.
+    """
+
+    def __init__(self, base=LOKAVIZ_BASE, user_agent=LOKAVIZ_UA):
+        self.base = base
+        self.ua = user_agent
+        self.cookies = {}
+
+    def _request(self, path, redirect=True):
+        url = path if path.startswith("http") else self.base + path
+        req = urllib.request.Request(url, headers={
+            "User-Agent": self.ua,
+            "Accept": "text/html,application/xhtml+xml,application/json",
+            "Cookie": "; ".join(f"{k}={v}" for k, v in self.cookies.items()) or "",
+        })
+        opener = urllib.request.build_opener()
+        if not redirect:
+            class NoRedirect(urllib.request.HTTPRedirectHandler):
+                def redirect_request(self, *a, **kw):
+                    return None
+            opener = urllib.request.build_opener(NoRedirect)
+        try:
+            resp = opener.open(req, timeout=30)
+        except urllib.error.HTTPError as e:
+            resp = e
+        for header in resp.headers.get_all("Set-Cookie") or []:
+            m = re.match(r"\s*([^=;]+)=([^;]*)", header)
+            if m and m.group(2):
+                self.cookies[m.group(1).strip()] = m.group(2).strip()
+        return resp.read().decode("utf-8", "replace")
+
+    def get(self, path):
+        """GET en résolvant le challenge si nécessaire (retourne le HTML)."""
+        body = self._request(path)
+        if "anubis_challenge" not in body:
+            return body
+        m = re.search(
+            r'<script id="anubis_challenge" type="application/json">(.*?)</script>',
+            body, re.S)
+        if not m:
+            raise RuntimeError("challenge Anubis introuvable dans la page")
+        challenge = json.loads(m.group(1))["challenge"]
+        response, nonce = solve_anubis(challenge["randomData"],
+                                       challenge.get("difficulty", 2))
+        params = urllib.parse.urlencode({
+            "id": challenge["id"], "response": response, "nonce": nonce,
+            "redir": path if path.startswith("/") else "/" + path,
+            "elapsedTime": "120",
+        })
+        self._request(f"/.within.website/x/cmd/anubis/api/pass-challenge?{params}",
+                      redirect=False)
+        body = self._request(path)
+        if "anubis_challenge" in body:
+            raise RuntimeError("challenge Anubis non résolu (cookie refusé)")
+        return body
+
+
+def lokaviz_search_url(type_ids=None, max_rent=None):
+    """URL de recherche lokaviz avec les filtres (types + loyer max)."""
+    type_ids = type_ids or LOKAVIZ_TYPE_IDS.split(",")
+    max_rent = max_rent or LOKAVIZ_MAX_RENT
+    filters = urllib.parse.urlencode(
+        [("refloglogement_id[]", t) for t in type_ids if t.strip()]
+        + [("loyer", str(max_rent))])
+    return f"{LOKAVIZ_DEFAULT_SEARCH}&{filters}"
+
+
+def strip_tags(fragment):
+    """HTML -> texte propre (retours à la ligne -> ", ")."""
+    txt = re.sub(r"<br\s*/?>", ", ", fragment)
+    txt = re.sub(r"<[^>]+>", " ", txt)
+    txt = html_mod.unescape(txt)
+    return re.sub(r"\s+", " ", txt).strip(" ,")
+
+
+def parse_lokaviz_listings(html):
+    """Extrait les annonces d'une page de résultats lokaviz (rendu serveur).
+
+    Retourne des dictionnaires bruts : id, link, type_txt, address,
+    rent_txt, charges, dispo, desc, ref.
+    """
+    items = []
+    for li in re.findall(r"<li><table.*?</table>\s*</li>", html, re.S):
+        id_m = re.search(r"logement_id:(\d+)", li)
+        if not id_m:
+            continue
+        href_m = re.search(r'href="(/rechercher-un-logement/fiche-logement/[^"]+)"', li)
+        type_m = re.search(r'<span class="type">(.*?)</span>', li, re.S)
+        rent_m = re.search(r'<span class="loyer"><strong>(.*?)</strong>', li, re.S)
+        charges_m = re.search(r'class="charges">(.*?)</span>', li, re.S)
+        dispo_m = re.search(r'<p class="date"><span>Disponible (?:le|du)</span>(.*?)</p>',
+                            li, re.S)
+        desc_m = re.search(r'</a></p><p class="">([^<]*)</p>', li)
+        ref_m = re.search(r"Ref\.(?:&nbsp;|\s)([^<]+)", li)
+        addresses = re.findall(r'<p class="adresse">(.*?)</p>', li, re.S)
+        addr_html = next((a for a in addresses if strip_tags(a)), "")
+        items.append({
+            "id": id_m.group(1),
+            "link": LOKAVIZ_BASE + href_m.group(1) if href_m else
+                    f"{LOKAVIZ_BASE}/rechercher-un-logement/fiche-logement/logement_id:{id_m.group(1)}",
+            "type_txt": strip_tags(type_m.group(1)) if type_m else "?",
+            "address": strip_tags(addr_html),
+            "rent_txt": strip_tags(rent_m.group(1)) if rent_m else "",
+            "charges": strip_tags(charges_m.group(1)) if charges_m else "",
+            "dispo": strip_tags(dispo_m.group(1)) if dispo_m else "",
+            "desc": strip_tags(desc_m.group(1)) if desc_m else "",
+            "ref": strip_tags(ref_m.group(1)) if ref_m else "",
+        })
+    return items
+
+
+def summarize_lokaviz(item):
+    """Condense une annonce lokaviz en fiche état/email (format commun CROUS)."""
+    rent_nums = [int(n) for n in re.findall(r"\d+", item.get("rent_txt", ""))]
+    per_room = "par chambre" in item.get("rent_txt", "")
+    if not rent_nums:
+        price, rent_min = "loyer non communiqué", None
+    else:
+        lo = min(rent_nums)
+        price = (f"{lo} €/mois" if len(set(rent_nums)) == 1
+                 else f"de {lo} à {max(rent_nums)} €/mois")
+        if per_room:
+            price += " par chambre"
+        rent_min = lo * 100                     # centimes, cohérent avec CROUS
+    residence = re.sub(r"\s*m2\b", " m²", item["type_txt"])
+    area_m = re.search(r"([\d.,]+)\s*m²", residence)
+    occupations = [f"Loyer : {item['rent_txt']}"] if item.get("rent_txt") else []
+    if item.get("charges"):
+        occupations.append(f"dont charges : {item['charges']}")
+    if item.get("dispo"):
+        occupations.append(f"disponible {item['dispo']}")
+    if item.get("desc"):
+        occupations.append(item["desc"])
+    return {
+        "id": str(item["id"]), "tool": LOKAVIZ_TOOL, "source": "lokaviz",
+        "residence": residence,
+        "address": item["address"] or "adresse non renseignée",
+        "type": item.get("desc") or residence,
+        "area_txt": area_m.group(1) if area_m else "?",
+        "occupations": occupations,
+        "price": price, "rent_min": rent_min,
+        "booking_fee": None, "high_demand": False,
+        "link": item["link"],
+    }
+
+
+def fetch_lokaviz(cfg, session=None):
+    """Recherche filtrée lokaviz avec pagination (au plus max_pages pages).
+
+    Les filtres (types de logement, loyer max, zone autour du Lycée Rabelais)
+    sont appliqués par le SERVEUR : la page ne contient que les annonces
+    correspondant aux critères.
+    """
+    session = session or AnubisSession()
+    path, _, query = (cfg.get("lokaviz_search_path") or LOKAVIZ_DEFAULT_SEARCH
+                     ).partition("?")
+    filters = urllib.parse.urlencode(
+        [("refloglogement_id[]", t) for t in cfg["lokaviz_type_ids"] if t.strip()]
+        + [("loyer", str(cfg["lokaviz_max_rent"]))])
+    full_query = "&".join(x for x in (query, filters) if x)
+    items, page = [], 1
+    while page <= cfg.get("lokaviz_max_pages", 10):
+        page_path = path if page == 1 else f"{path}/page:{page}"
+        try:
+            html = session.get(f"{page_path}?{full_query}")
+        except (urllib.error.URLError, OSError, RuntimeError) as e:
+            if page == 1:
+                raise RuntimeError(f"lokaviz injoignable : {e}")
+            log(f"lokaviz : page {page} illisible ({e}) — arrêt de la pagination.")
+            break
+        batch = parse_lokaviz_listings(html)
+        items.extend(batch)
+        nxt = re.search(r'href="([^"]*page:(\d+)[^"]*)"[^>]*id="pag_next"', html)
+        if not nxt:
+            break
+        page = int(nxt.group(2))
+    # dédoublonne par ID (sécurité si une page change entre deux requêtes)
+    unique, seen_ids = [], set()
+    for it in items:
+        if it["id"] not in seen_ids:
+            seen_ids.add(it["id"])
+            unique.append(it)
+    return unique
 
 
 def in_zone(item, prefixes):
@@ -243,13 +478,17 @@ def load_state():
     items = {f"{LEGACY_TOOL}:{k}" if re.fullmatch(r"\d+", k) else k: v
              for k, v in data["items"].items()}
     initialized = data.get("initialized_tools") or [LEGACY_TOOL]
-    return {"items": items, "initialized_tools": [int(t) for t in initialized]}
+    # outils CROUS (entiers) + sources nommées ("lokaviz") peuvent cohabiter
+    tools = [int(t) if str(t).isdigit() else t for t in initialized]
+    return {"items": items, "initialized_tools": tools}
 
 
 def save_state(current, initialized_tools):
+    # tri stable : entiers (outils CROUS) d'abord, puis sources nommées
+    tools = sorted(set(initialized_tools), key=lambda t: (isinstance(t, str), t))
     STATE.write_text(
         json.dumps({"updated": datetime.now().isoformat(timespec="seconds"),
-                    "initialized_tools": sorted(set(initialized_tools)),
+                    "initialized_tools": tools,
                     "items": current},
                    ensure_ascii=False, indent=1),
         encoding="utf-8")
@@ -321,10 +560,13 @@ def build_notification(new, zone_count):
     now = datetime.now().strftime("%d/%m/%Y à %H:%M")
     entries = sorted(new.values(), key=lambda s: (s["residence"], s["id"]))
     n = len(entries)
+    sources = {s.get("source", "crous") for s in entries}
+    brand = "Lokaviz Paris" if sources == {"lokaviz"} else (
+        "Logements Paris" if len(sources) > 1 else "CROUS Paris")
     if n == 1:
-        subject = f"CROUS Paris — {entries[0]['residence']} · {entries[0]['type']} · {entries[0]['price']}"
+        subject = f"{brand} — {entries[0]['residence']} · {entries[0]['price']}"
     else:
-        subject = f"CROUS Paris — {n} logements disponibles ({entries[0]['residence']}…)"
+        subject = f"{brand} — {n} logements disponibles ({entries[0]['residence']}…)"
 
     blocks = []
     for s in entries:
@@ -342,11 +584,14 @@ def build_notification(new, zone_count):
             f"Type : {s['type']} — {s['area_txt']} m²\n"
             + ("   " + " ; ".join(extra) + "\n" if extra else "")
             + f"RÉSERVER : {s['link']}\n")
-    text = (f"{n} logement(s) CROUS disponible(s) à Paris — détecté le {now}.\n\n"
+    search_links = f"Recherche complète : {SITE_URL.format(tool_id=47)}/search\n"
+    if "lokaviz" in sources:
+        search_links += ("Recherche Lokaviz (filtres appliqués) : "
+                         + lokaviz_search_url() + "\n")
+    text = (f"{n} logement(s) disponible(s) — détecté le {now}.\n\n"
             + "\n".join(blocks)
-            + "\nRecherche complète : "
-            + SITE_URL.format(tool_id=47) + "/search\n"
-            + "\n— Bot CROUS Paris (surveillance automatique)\n")
+            + "\n" + search_links
+            + "\n— Bot logements étudiants Paris (surveillance automatique)\n")
 
     cards = []
     for s in entries:
@@ -371,7 +616,7 @@ def build_notification(new, zone_count):
 <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
   <div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:8px;overflow:hidden;">
     <div style="background:#000091;color:#ffffff;padding:18px 24px;">
-      <h1 style="margin:0;font-size:18px;">{n} logement(s) CROUS à Paris — {now}</h1>
+      <h1 style="margin:0;font-size:18px;">{n} logement(s) {brand} — {now}</h1>
       <p style="margin:6px 0 0;font-size:13px;opacity:.85;">{zone_count} logement(s) au total dans la zone surveillée</p>
     </div>
     <div style="padding:24px;">{''.join(cards)}
@@ -558,11 +803,12 @@ def run_digest(cfg):
 # ---------------------------------------------------------------------------
 
 def check(cfg, zone_by_tool):
-    """Compare la zone surveillée (tous outils) avec l'état précédent."""
+    """Compare la zone surveillée (tous outils + lokaviz) avec l'état précédent."""
     current = {}
     for tool_id, items in zone_by_tool.items():
         for item in items:
-            s = summarize(item, tool_id)
+            s = (summarize_lokaviz(item) if isinstance(tool_id, str)
+                 else summarize(item, tool_id))
             current[f"{tool_id}:{s['id']}"] = s
         log(f"outil {tool_id} : {len(items)} logement(s) dans la zone surveillée")
 
@@ -635,7 +881,9 @@ def main():
         return
 
     log(f"Démarrage — outils CROUS : {', '.join(str(t) for t in cfg['tool_ids'])}, "
-        f"zone : codes postaux {', '.join(cfg['postal_prefixes'])}xxx.")
+        f"zone : codes postaux {', '.join(cfg['postal_prefixes'])}xxx"
+        + (f" ; lokaviz : types {LOKAVIZ_TYPE_IDS} <= {LOKAVIZ_MAX_RENT} €"
+           if cfg["lokaviz_enabled"] else ""))
 
     zone_by_tool, france_counts, failures = {}, {}, []
     for tool_id in cfg["tool_ids"]:
@@ -651,6 +899,17 @@ def main():
             f"{len(zone)} dans la zone.")
         zone_by_tool[tool_id] = zone
         france_counts[tool_id] = len(items)
+
+    if cfg["lokaviz_enabled"]:
+        try:
+            lokaviz_items = fetch_lokaviz(cfg)
+            zone_by_tool[LOKAVIZ_TOOL] = lokaviz_items
+            log(f"lokaviz : {len(lokaviz_items)} annonce(s) correspondant aux "
+                f"filtres (types + {cfg['lokaviz_max_rent']} € max, autour du "
+                f"Lycée Rabelais).")
+        except RuntimeError as e:
+            failures.append(LOKAVIZ_TOOL)
+            log(f"lokaviz : ÉCHEC ({e})")
 
     if not zone_by_tool:
         die("API CROUS injoignable pour tous les outils — rien à vérifier.")
