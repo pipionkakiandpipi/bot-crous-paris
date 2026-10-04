@@ -677,18 +677,20 @@ def watchdog_decision(runs, now=None):
     """Analyse les runs du workflow de surveillance.
 
     Retourne None (tout va bien / panne déjà signalée) ou un dict
-    décrivant la panne. Seuls les runs planifiés (cron) comptent : un run
-    manuel ne prouve pas que la surveillance automatique fonctionne.
+    décrivant la panne. Les runs cron GitHub ET les runs déclenchés à
+    distance (cron externe type cron-job.org) comptent : tous prouvent
+    que la vérification a bien tourné.
     """
     now = now or datetime.now(timezone.utc)
-    scheduled = [r for r in runs if r.get("event") == "schedule"]
-    if not scheduled:
+    checks = [r for r in runs
+              if r.get("event") in ("schedule", "workflow_dispatch")]
+    if not checks:
         return {"age_min": None, "last_conclusion": None,
-                "reason": "aucun run planifié récent (cron désactivé ?)"}
-    last_ok = next((r for r in scheduled if r.get("conclusion") == "success"), None)
+                "reason": "aucune vérification récente (crons GitHub et externe désactivés ?)"}
+    last_ok = next((r for r in checks if r.get("conclusion") == "success"), None)
     if last_ok is None:
-        return {"age_min": None, "last_conclusion": scheduled[0].get("conclusion"),
-                "reason": "des runs planifiés existent mais aucun ne réussit"}
+        return {"age_min": None, "last_conclusion": checks[0].get("conclusion"),
+                "reason": "des vérifications existent mais aucune ne réussit"}
     updated = datetime.strptime(last_ok["updated_at"], "%Y-%m-%dT%H:%M:%SZ")
     updated = updated.replace(tzinfo=timezone.utc)
     age_min = int((now - updated).total_seconds() / 60)

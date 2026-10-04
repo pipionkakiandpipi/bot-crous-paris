@@ -256,14 +256,18 @@ class TestWatchdog(BotTestCase):
         # panne ancienne (> fenêtre max) -> silence (déjà alerté)
         self.assertIsNone(crous_bot.watchdog_decision(
             [self.run_at(w + 200, "failure"), self.run_at(w + 220, "success")], now))
-        # aucun run planifié -> ALERTE (cron désactivé ?)
+        # aucun run de vérification -> ALERTE (crons GitHub et externe morts ?)
         self.assertIsNotNone(crous_bot.watchdog_decision([], now))
         # runs mais aucun succès -> ALERTE
         self.assertIsNotNone(crous_bot.watchdog_decision(
             [self.run_at(10, "failure")], now))
-        # un run manuel (workflow_dispatch) ne compte pas comme succès
-        self.assertIsNotNone(crous_bot.watchdog_decision(
+        # un run déclenché à distance (cron externe) EST une preuve de vie
+        self.assertIsNone(crous_bot.watchdog_decision(
             [self.run_at(2, "success", event="workflow_dispatch")], now))
+        # mélange : succès distant récent + échecs cron anciens -> pas d'alerte
+        self.assertIsNone(crous_bot.watchdog_decision(
+            [self.run_at(30, "failure"),
+             self.run_at(5, "success", event="workflow_dispatch")], now))
 
     def test_contenu_alerte(self):
         now = datetime.now(timezone.utc)

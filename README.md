@@ -120,9 +120,9 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes
 > 12 h sans aucune vérification réussie, pour ne t'envoyer que les vraies
 > pannes. C'est une limite connue de l'infrastructure partagée GitHub, pas
 > un bug du bot. C'est le compromis de l'hébergement 100 % gratuit — le bot
-> reste entièrement fonctionnel sur GitHub. **Si un jour tu veux passer à la
-> vraie cadence 10 minutes, tout est prêt : voir la section
-> [Option avancée : VM gratuite](#option-avancée--vm-gratuite-pour-la-vraie-cadence-10-minutes-facultatif).**
+> reste entièrement fonctionnel sur GitHub. **Pour une vraie cadence 10 minutes
+> malgré ce bridage : voir la section
+> [Déclenchement externe cron-job.org](#vraie-cadence-10-minutes--déclenchement-externe-cron-job-org).**
 
 ## Personnalisation
 
@@ -147,7 +147,77 @@ Dans le workflow `.github/workflows/crous.yml` (section *env* de l'étape
 Le destinataire des emails (`NOTIFY_EMAIL`) : jusqu'à ~500/jour côté Gmail,
 largement suffisant (vous recevrez quelques emails par semaine au plus).
 
-## Option avancée : VM gratuite pour la vraie cadence 10 minutes (facultatif)
+## Vraie cadence 10 minutes — déclenchement externe cron-job.org
+
+GitHub peut affamer le planificateur de crons (constaté : des trous de
+5 h sans aucun run). La parade fiable et simple : un service de cron
+externe gratuit qui ordonne à GitHub de lancer le bot toutes les 10 minutes
+via son API (toujours fiable, elle). **Gratuit, sans carte bancaire, ~10 min
+de configuration.**
+
+### 1. Jeton GitHub (2 min)
+
+github.com > Settings > Developer settings > **Fine-grained tokens** >
+Generate new token :
+
+- *Repository access* : **Only select repositories** → `bot-crous-paris`
+- *Repository permissions* : **Actions → Read and write** (rien d'autre)
+- *Expiration* : 90 jours (note la date, à renouveler)
+
+Copie le jeton généré (`github_pat_…`).
+
+### 2. Compte cron-job.org (1 min)
+
+Crée un compte gratuit sur https://cron-job.org (email + mot de passe,
+sans carte).
+
+### 3. Job 1 — vérification toutes les 10 minutes
+
+Dans cron-job.org : *Create cronjob* :
+
+- **URL** :
+  `https://api.github.com/repos/pipionkakiandpipi/bot-crous-paris/actions/workflows/crous.yml/dispatches`
+- **Method (onglet Advanced)** : `POST`
+- **Headers** (onglet Advanced) :
+  - `Authorization: Bearer github_pat_…` (ton jeton)
+  - `Content-Type: application/json`
+- **Body** (onglet Advanced) : `{"ref":"main"}`
+- **Schedule** : *Every 10 minutes*
+
+Crée le job, puis vérifie : onglet **Actions** du dépôt GitHub — un run
+« Vérification CROUS Paris » (event `workflow_dispatch`) doit apparaître
+en moins de 10 minutes, et un toutes les 10 minutes ensuite.
+
+### 4. Job 2 — watchdog horaire (recommandé)
+
+Même chose que le job 1, avec :
+
+- **URL** :
+  `https://api.github.com/repos/pipionkakiandpipi/bot-crous-paris/actions/workflows/watchdog.yml/dispatches`
+- **Body** : `{"ref":"main","inputs":{"watchdog":true}}`
+- **Schedule** : *Every hour*
+
+Le watchdog envoie un email si aucune vérification ne réussit depuis 12 h
+(que ce soit via le cron GitHub ou le cron externe — les deux comptent).
+
+### 5. Job 3 — résumé hebdo (optionnel)
+
+Comme le job 2, mais :
+
+- **URL** : celui du job 2 (workflow `watchdog.yml`)
+- **Body** : `{"ref":"main","inputs":{"digest":true}}`
+- **Schedule** : *Every week* (choisir dimanche 18:00)
+
+### Notes
+
+- Les crons GitHub natifs restent actifs en bonus (s'ils passent, double
+  vérification sans conséquence — les runs sont sérialisés par le groupe
+  de concurrency).
+- Si cron-job.org alerte d'erreurs HTTP (autres que 204), vérifie le jeton
+  (expiré ? permission Actions manquante ?).
+- Le digest hebdo natif de GitHub reste aussi configuré en secours.
+
+## Option avancée : VM gratuite (Oracle) — alternative à cron-job.org
 
 Le bot fonctionne très bien sur GitHub Actions — cette section est **purement
 optionnelle**, pour plus tard si tu veux passer à une vraie cadence 10 minutes
