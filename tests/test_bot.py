@@ -276,6 +276,38 @@ class TestWatchdog(BotTestCase):
         self.assertIn("actions", text)        # lien vers les logs GitHub
 
 
+class TestLocalWatchdog(BotTestCase):
+    """Watchdog VM (migration Oracle) : panne si l'état ne rafraîchit plus."""
+
+    @staticmethod
+    def state_at(minutes_ago):
+        from datetime import timedelta
+        ts = (datetime.now() - timedelta(minutes=minutes_ago)).isoformat(
+            timespec="seconds")
+        return {"updated": ts, "items": {}}
+
+    def test_etat_frais_silence(self):
+        self.assertIsNone(crous_bot.local_watchdog_decision(
+            self.state_at(5)))
+
+    def test_etat_panne_alerte(self):
+        age = crous_bot.WATCHDOG_THRESHOLD_MIN + 30
+        decision = crous_bot.local_watchdog_decision(self.state_at(age))
+        self.assertIsNotNone(decision)
+        self.assertEqual(decision["age_min"], age)
+        subject, text, html = crous_bot.build_watchdog_alert(decision)
+        self.assertIn("PANNE", subject)
+
+    def test_etat_jamais_ecrit_alerte(self):
+        decision = crous_bot.local_watchdog_decision(None)
+        self.assertIsNotNone(decision)
+        self.assertIsNone(decision["age_min"])
+
+    def test_panne_ancienne_silence_deja_signalee(self):
+        age = crous_bot.WATCHDOG_WINDOW_MAX + 200
+        self.assertIsNone(crous_bot.local_watchdog_decision(self.state_at(age)))
+
+
 class TestDigest(BotTestCase):
     def test_stats_et_email(self):
         base = datetime(2026, 10, 3, 12, 0)

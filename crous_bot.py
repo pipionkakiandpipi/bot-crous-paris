@@ -43,7 +43,8 @@ Usage :
     python crous_bot.py                # passage normal (celui du cron)
     python crous_bot.py --test-email   # email de test + passage
     python crous_bot.py --dry-run      # simulate : aperçu email, état gelé
-    python crous_bot.py --watchdog     # contrôle de santé (cron horaire)
+    python crous_bot.py --watchdog     # contrôle de santé (cron horaire, GitHub Actions)
+    python crous_bot.py --local-watchdog  # contrôle de santé VM (fraîcheur seen.json)
     python crous_bot.py --digest       # résumé hebdo (cron dimanche)
 """
 import hashlib
@@ -132,6 +133,7 @@ def load_config():
                             or "--test-email" in sys.argv),
         "dry_run": "--dry-run" in sys.argv,
         "watchdog": "--watchdog" in sys.argv,
+        "local_watchdog": "--local-watchdog" in sys.argv,
         "digest": "--digest" in sys.argv,
         "lokaviz_enabled": os.environ.get("LOKAVIZ_ENABLED", "true").strip().lower() != "false",
         "lokaviz_type_ids": [t.strip() for t in
@@ -744,6 +746,42 @@ def run_watchdog(cfg):
     log(f"Watchdog : EMAIL D'ALERTE envoyé ({decision['reason']}).")
 
 
+def local_watchdog_decision(state, now=None):
+    """Watchdog VM (hébergement type Oracle) : une panne est détectée quand
+    la dernière sauvegarde d'état (seen.json "updated") ne rafraîchit plus.
+
+    Retourne None (tout va bien / panne déjà signalée) ou un dict panne.
+    """
+    now = now or datetime.now()
+    if not state or not state.get("updated"):
+        return {"age_min": None, "last_conclusion": None,
+                "reason": "aucun état sauvegardé (le bot n'a jamais tourné ?)"}
+    try:
+        updated = datetime.fromisoformat(str(state["updated"]))
+    except ValueError:
+        return {"age_min": None, "last_conclusion": None,
+                "reason": "seen.json illisible (horodatage invalide)"}
+    age_min = int((now - updated).total_seconds() / 60)
+    if WATCHDOG_THRESHOLD_MIN <= age_min <= WATCHDOG_WINDOW_MAX:
+        return {"age_min": age_min, "last_conclusion": None,
+                "reason": f"dernière vérification réussie il y a {age_min} min"}
+    return None
+
+
+def run_local_watchdog(cfg):
+    state = load_state()
+    if state is None:
+        state = {}
+    decision = local_watchdog_decision(state)
+    if decision is None:
+        log("Watchdog VM : pas d'alerte (état rafraîchi récemment, "
+            "ou panne déjà signalée).")
+        return
+    subject, text, html = build_watchdog_alert(decision)
+    send_email(cfg, subject, text, html)
+    log(f"Watchdog VM : EMAIL D'ALERTE envoyé ({decision['reason']}).")
+
+
 # ---------------------------------------------------------------------------
 # Digest hebdomadaire
 # ---------------------------------------------------------------------------
@@ -875,6 +913,9 @@ def main():
 
     if cfg["watchdog"]:
         run_watchdog(cfg)
+        return
+    if cfg["local_watchdog"]:
+        run_local_watchdog(cfg)
         return
     if cfg["digest"]:
         run_digest(cfg)

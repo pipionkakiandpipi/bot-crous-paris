@@ -119,7 +119,8 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes
 > augmentent les chances d'exécution, et le watchdog ne t'alerte qu'après
 > 12 h sans aucune vérification réussie, pour ne t'envoyer que les vraies
 > pannes. C'est une limite connue de l'infrastructure partagée GitHub, pas
-> un bug du bot.
+> un bug du bot. **Pour une vraie cadence 10 minutes, voir la section
+> [Migration VM gratuite](#migrer-sur-une-vm-gratuite--vraie-vérif-toutes-les-10-minutes).**
 
 ## Personnalisation
 
@@ -143,6 +144,64 @@ Dans le workflow `.github/workflows/crous.yml` (section *env* de l'étape
 
 Le destinataire des emails (`NOTIFY_EMAIL`) : jusqu'à ~500/jour côté Gmail,
 largement suffisant (vous recevrez quelques emails par semaine au plus).
+
+## Migrer sur une VM gratuite — vraie vérif toutes les 10 minutes
+
+GitHub Actions retarde fortement les crons fréquents (limite d'infrastructure
+partagée : ~1 exécution toutes les 1 à 3 h constaté). Pour une **vraie cadence
+10 minutes**, hébergez le bot sur une VM Oracle Cloud « Always Free »
+(gratuite à vie). Tout est préparé (`deploy/oracle/`).
+
+### 1. Compte + VM (une fois, ~10 min)
+
+1. Créez un compte sur https://cloud.oracle.com (carte bancaire demandée
+   pour vérification d'identité — **jamais débitée** sur l'offre Always Free).
+2. Compute > Create instance :
+   - Image : **Ubuntu 22.04 ou 24.04**
+   - Shape : **VM.Standard.E2.1.Micro** (badge Always Free)
+   - SSH : *Generate SSH key pair* → téléchargez la clé privée
+3. Quand l'instance est **Running**, connectez-vous depuis votre PC :
+   ```bash
+   ssh -i <chemin/vers/clé.privée> ubuntu@<IP_pubique_de_la_VM>
+   ```
+
+### 2. Jeton GitHub (~2 min)
+
+github.com > Settings > Developer settings > **Fine-grained tokens** >
+Generate new token : *Repository access* = Only select repositories →
+`bot-crous-paris` ; *Permissions* > **Contents : Read and write**.
+
+### 3. Installation sur la VM (1 commande)
+
+```bash
+curl -fsSL -o /tmp/install.sh \
+  https://raw.githubusercontent.com/pipionkakiandpipi/bot-crous-paris/main/deploy/oracle/install.sh
+sudo bash /tmp/install.sh
+```
+
+L'installateur pose 4 questions (Gmail ×2, destinataire, jeton GitHub —
+saisies masquées), puis : clone du dépôt dans `/opt/bot-crous`, **cron toutes
+les 10 minutes**, watchdog VM (email si l'état ne rafraîchit plus depuis
+12 h), résumé hebdo, logrotate, et un test immédiat — vous recevez un email
+de confirmation.
+
+### 4. Vérifier
+
+```bash
+tail -f /var/log/bot-crous.log          # un passage toutes les 10 minutes
+git -C /opt/bot-crous log --oneline -3   # l'état se synchronise sur GitHub
+```
+
+### 5. Désactiver la cron GitHub (éviter les doublons)
+
+Une fois la VM validée : onglet **Actions** du dépôt > *Vérification CROUS
+Paris* > menu **…** > *Disable workflow*. L'état (`seen.json`) et
+l'historique (`history.jsonl`) restent synchronisés dans le même dépôt —
+la VM pousse ses mises à jour comme le faisait Actions.
+
+> Piège à éviter : Render/Railway/Fly (offres gratuites 24/7 mortes ou
+> endormies), PythonAnywhere (1 tâche/jour), Vercel/Netlify (cron quotidien).
+> Oracle est la seule vraie VM gratuite à vie avec cron native.
 
 ## Utilisation locale (optionnel)
 
