@@ -73,11 +73,13 @@ Dans votre dépôt : onglet **Actions** → **Vérification CROUS Paris** →
 - Le log affiche : nombre de logements en ligne (France + zone Paris).
 - Le premier passage **mémorise** les logements existants sans envoyer d'alerte.
 
-C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes.
+C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes
+(nominal — voir la note sur la fréquence réelle ci-dessous).
 
 ## Comment ça marche
 
-1. Toutes les 10 minutes, GitHub Actions lance `crous_bot.py`.
+1. Toutes les 10 minutes (créneaux nominaux + créneaux décalés), GitHub
+   Actions lance `crous_bot.py`.
 2. Le script interroge l'API JSON interne du site CROUS (celle que la page
    appelle elle-même) pour **chaque outil surveillé** (47 phase complémentaire
    + 44 attribution directe) et récupère tous les logements en recherche.
@@ -91,12 +93,20 @@ C'est tout. Le bot tourne maintenant tout seul, toutes les 10 minutes.
    (réservation abandonnée) déclenche à nouveau un email — c'est voulu,
    c'est une nouvelle chance de l'attraper (marqué `reappeared` dans
    l'historique).
-6. **Watchdog** (chaque heure) : si aucune vérification réussie depuis 35 à
-   95 minutes → email « PANNE bot CROUS ». Exactement un email par panne ;
-   silence = tout va bien.
+6. **Watchdog** (chaque heure) : si aucune vérification planifiée réussie
+   depuis **12 h** → email « PANNE bot CROUS ». Exactement un email par
+   panne ; silence = tout va bien.
 7. **Digest** (chaque dimanche 19-20h) : email de résumé — nombre de
    détections depuis le début, réapparitions, logements actuellement
    disponibles à Paris.
+
+> **Note sur la fréquence réelle** : GitHub Actions (gratuit) retarde ou
+> supprime les crons très fréquents — constaté : ~1 exécution toutes les 1 à
+> 3 h au lieu de 10 min. Les créneaux décalés (minutes 3/17/31/47)
+> augmentent les chances d'exécution, et le watchdog ne t'alerte qu'après
+> 12 h sans aucune vérification réussie, pour ne t'envoyer que les vraies
+> pannes. C'est une limite connue de l'infrastructure partagée GitHub, pas
+> un bug du bot.
 
 ## Personnalisation
 

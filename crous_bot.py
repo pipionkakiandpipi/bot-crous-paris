@@ -15,7 +15,7 @@ adapté puis étendu :
     (premier passage mémorise, sans email) ;
   - EMAIL V2 : sujet = résidence · type · loyer ; corps centré sur le lien
     direct, l'adresse et le prix ;
-  - WATCHDOG : si aucune vérification réussie depuis 35 à 95 minutes,
+  - WATCHDOG : si aucune vérification planifiée réussie depuis 12 h,
     un email "BOT EN PANNE" est envoyé (exactement un par panne) ;
   - DIGEST : résumé hebdomadaire par email (détections, réapparitions,
     logements encore disponibles) ;
@@ -67,8 +67,8 @@ OCCUPATION_LABELS = {"alone": "seul(e)", "couple": "en couple",
                      "house_sharing": "colocation"}
 ATTEMPTS = 3          # tentatives d'appel API avant abandon (par outil)
 RETRY_DELAY = 30      # secondes entre deux tentatives (salle d'attente)
-WATCHDOG_THRESHOLD_MIN = 35   # plus ancienne réussite tolérée (min)
-WATCHDOG_WINDOW_MAX = 95      # au-delà : panne déjà signalée, silence
+WATCHDOG_THRESHOLD_MIN = 720  # plus ancienne réussite tolérée (min) — GitHub décale fortement les crons fréquents, on n'alerte qu'après 12 h sans vérification
+WATCHDOG_WINDOW_MAX = 1440    # au-delà : panne déjà signalée, silence (24 h)
 LEGACY_TOOL = 47      # outil de l'époque v1 (clés d'état non préfixées)
 
 
@@ -492,7 +492,7 @@ def run_watchdog(cfg):
         die(f"watchdog : impossible de lire l'historique GitHub ({e}).")
     decision = watchdog_decision(runs)
     if decision is None:
-        log("Watchdog OK — dernière vérification réussie récente, pas d'alerte.")
+        log("Watchdog : pas d'alerte (vérification réussie récente, ou panne déjà signalée).")
         return
     subject, text, html = build_watchdog_alert(decision)
     send_email(cfg, subject, text, html)

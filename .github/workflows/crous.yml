@@ -6,7 +6,8 @@ name: Vérification CROUS Paris
 
 on:
   schedule:
-    - cron: '*/10 * * * *'   # toutes les 10 minutes
+    - cron: '*/10 * * * *'   # toutes les 10 minutes (nominal)
+    - cron: '3,17,31,47 * * * *'  # créneaux décalés : GitHub décale/supprime les crons fréquents, ceux-ci augmentent les chances d'exécution réelle
     - cron: '0 3 1 * *'      # le 1er de chaque mois à 3h UTC (garder le cron actif)
   workflow_dispatch:        # permet aussi de lancer manuellement
     inputs:

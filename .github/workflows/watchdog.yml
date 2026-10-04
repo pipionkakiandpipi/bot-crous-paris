@@ -1,12 +1,12 @@
 name: Watchdog + résumé hebdo CROUS
 
-# Contrôle de santé du bot : si aucune vérification réussie depuis 35 à
-# 95 minutes, un email "BOT EN PANNE" est envoyé (exactement un par panne).
+# Contrôle de santé du bot : si aucune vérification planifiée réussie depuis
+# 12 h, un email "BOT EN PANNE" est envoyé (exactement un par panne).
 # Chaque dimanche soir, un email de résumé confirme que tout fonctionne.
 
 on:
   schedule:
-    - cron: '0 * * * *'      # watchdog toutes les heures
+    - cron: '7 * * * *'      # watchdog toutes les heures (minute décalée : l'heure pile est congestionnée)
     - cron: '0 18 * * 0'     # résumé hebdo le dimanche 18h UTC (19-20h Paris)
   workflow_dispatch:        # tests manuels
     inputs:
@@ -29,7 +29,7 @@ jobs:
   watchdog:
     if: >-
       (github.event_name == 'workflow_dispatch' && inputs.watchdog) ||
-      (github.event_name == 'schedule' && github.event.schedule == '0 * * * *')
+      (github.event_name == 'schedule' && github.event.schedule == '7 * * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

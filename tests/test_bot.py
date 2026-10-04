@@ -242,15 +242,17 @@ class TestWatchdog(BotTestCase):
 
     def test_fenetres_alerte(self):
         now = datetime.now(timezone.utc)
+        t = crous_bot.WATCHDOG_THRESHOLD_MIN
+        w = crous_bot.WATCHDOG_WINDOW_MAX
         # dernière réussite récente -> silence
         self.assertIsNone(crous_bot.watchdog_decision(
             [self.run_at(5, "success"), self.run_at(15, "failure")], now))
-        # dernière réussite il y a 50 min -> ALERTE (panne en cours, 1 seul mail)
+        # dernière réussite au-delà du seuil -> ALERTE (panne en cours, 1 seul mail)
         self.assertIsNotNone(crous_bot.watchdog_decision(
-            [self.run_at(50, "failure"), self.run_at(70, "success")], now))
-        # panne ancienne (> 95 min) -> silence (déjà alerté)
+            [self.run_at(t + 20, "failure"), self.run_at(t + 40, "success")], now))
+        # panne ancienne (> fenêtre max) -> silence (déjà alerté)
         self.assertIsNone(crous_bot.watchdog_decision(
-            [self.run_at(200, "failure"), self.run_at(220, "success")], now))
+            [self.run_at(w + 200, "failure"), self.run_at(w + 220, "success")], now))
         # aucun run planifié -> ALERTE (cron désactivé ?)
         self.assertIsNotNone(crous_bot.watchdog_decision([], now))
         # runs mais aucun succès -> ALERTE
@@ -262,11 +264,12 @@ class TestWatchdog(BotTestCase):
 
     def test_contenu_alerte(self):
         now = datetime.now(timezone.utc)
+        age = crous_bot.WATCHDOG_THRESHOLD_MIN + 60
         decision = crous_bot.watchdog_decision(
-            [self.run_at(50, "failure"), self.run_at(80, "success")], now)
+            [self.run_at(age + 20, "failure"), self.run_at(age, "success")], now)
         subject, text, html = crous_bot.build_watchdog_alert(decision)
         self.assertIn("PANNE", subject)
-        self.assertIn("80", subject)   # âge depuis la dernière RÉUSSITE (minutes)
+        self.assertIn(str(age), subject)   # âge depuis la dernière RÉUSSITE (minutes)
         self.assertIn("actions", text)        # lien vers les logs GitHub
 
 
