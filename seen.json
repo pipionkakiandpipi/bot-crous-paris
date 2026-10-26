@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-26T16:10:41",
+ "updated": "2026-10-26T19:52:34",
  "initialized_tools": [
   44,
   47,
@@ -24,8 +24,7 @@
    "rent_min": 65000,
    "booking_fee": null,
    "high_demand": false,
-   "link": "https://www.lokaviz.fr/rechercher-un-logement/fiche-logement/studio-ou-t1-18-m2-meuble-independant-paris-5eme-arrondissement-75005/logement_id:213096?etab_id=118&amp;pres_de=Lyc%C3%A9e+Rabelais+18e+%2875+-+Paris%29&amp;nbkm=6&amp;NE=48.98967992353915%2C2.4969863891601567&amp;SW=48.80912453144312%2C2.193832397460938&amp;ZOOM=12&amp;refloglogement_id%5B0%5D=4&amp;refloglogement_id%5B1%5D=1&amp;refloglogement_id%5B2%5D=146&amp;loyer=750",
-   "reappeared": false
+   "link": "https://www.lokaviz.fr/rechercher-un-logement/fiche-logement/studio-ou-t1-18-m2-meuble-independant-paris-5eme-arrondissement-75005/logement_id:213096?etab_id=118&amp;pres_de=Lyc%C3%A9e+Rabelais+18e+%2875+-+Paris%29&amp;nbkm=6&amp;NE=48.98967992353915%2C2.4969863891601567&amp;SW=48.80912453144312%2C2.193832397460938&amp;ZOOM=12&amp;refloglogement_id%5B0%5D=4&amp;refloglogement_id%5B1%5D=1&amp;refloglogement_id%5B2%5D=146&amp;loyer=750"
   },
   "lokaviz:213031": {
    "id": "213031",
