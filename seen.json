@@ -1,11 +1,32 @@
 {
- "updated": "2026-11-05T17:52:11",
+ "updated": "2026-11-06T10:53:59",
  "initialized_tools": [
   44,
   47,
   "lokaviz"
  ],
  "items": {
+  "lokaviz:213259": {
+   "id": "213259",
+   "tool": "lokaviz",
+   "source": "lokaviz",
+   "residence": "Studio ou T1",
+   "address": "RUE PAUL LAURENT, 75019 Paris 19eme Arrondissement",
+   "type": "Meublé, indépendant, dans un immeuble",
+   "area_txt": "?",
+   "occupations": [
+    "Loyer : Loyer : 750 €",
+    "dont charges : 150 €",
+    "disponible 15/11/2026, au 15/08/2027",
+    "Meublé, indépendant, dans un immeuble"
+   ],
+   "price": "750 €/mois",
+   "rent_min": 75000,
+   "booking_fee": null,
+   "high_demand": false,
+   "link": "https://www.lokaviz.fr/rechercher-un-logement/fiche-logement/studio-ou-t1-16-m2-meuble-independant-paris-19eme-arrondissement-75019/logement_id:213259?etab_id=118&amp;pres_de=Lyc%C3%A9e+Rabelais+18e+%2875+-+Paris%29&amp;nbkm=6&amp;NE=48.98967992353915%2C2.4969863891601567&amp;SW=48.80912453144312%2C2.193832397460938&amp;ZOOM=12&amp;refloglogement_id%5B0%5D=4&amp;refloglogement_id%5B1%5D=1&amp;refloglogement_id%5B2%5D=146&amp;loyer=750",
+   "reappeared": false
+  },
   "lokaviz:212953": {
    "id": "212953",
    "tool": "lokaviz",
